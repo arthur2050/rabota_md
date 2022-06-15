@@ -23,6 +23,15 @@
                         return false;
                     }
                 );
+
+                $("#detail_page_ref").click(
+                    function (e) {
+                        let formDetail = $("#detail_page_form");
+                        e.preventDefault();
+                        formDetail.submit();
+                        return false;
+                    }
+                );
             });
 
             function sendAjaxForm(result_form, ajax_form, url) {
