@@ -1,0 +1,6 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+app_job:
+  path:     /find_by_keyword
+  controller: App\Controller\JobController::find_by_keyword

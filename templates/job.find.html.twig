@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome!{% endblock %}</title>
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
+    {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+    {% block stylesheets %}
+        {# {{ encore_entry_link_tags('app') }} #}
+    {% endblock %}
+
+    {% block javascripts %}
+        {# {{ encore_entry_script_tags('app') }} #}
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script>
+            $(document).ready(function () {
+
+                $("#btn").click(
+                    function () {
+                        sendAjaxForm('result_form', 'ajax_form', '{{ (path('find_by_keyword')) }}');
+                        return false;
+                    }
+                );
+            });
+
+            function sendAjaxForm(result_form, ajax_form, url) {
+                $.ajax({
+                    url: url, //url страницы
+                    type: "GET", //метод отправки
+                    dataType: "json", //формат данных
+                    data: $("#" + ajax_form).serialize(),  // Сеарилизуем объект
+                    success: function (response) { //Данные отправлены успешно
+                        let jobStr = '';
+                        for (const job of response.jobs) {
+                            jobStr += `Title: ${job.title}  Company: ${job.company} <br>`;
+                        }
+
+                        let cvsStr = '';
+                        for (const cv of response.cvs) {
+                            cvsStr += `<input type="text" hidden name="cvs[${cv.id}][name]" value="${cv.name}">`;
+                            cvsStr += `<input type="text" hidden name="cvs[${cv.id}][experience]" value="${cv.experience}">`;
+                        }
+
+                        let formDetail = $("#detail_page_form");
+                        formDetail.attr({hidden: false});
+                        formDetail.html(formDetail.html() + cvsStr);
+                        $('#result_form').html(jobStr);
+                        $("#detail_page_ref").click(
+                            function (e) {
+                                let formDetail = $("#detail_page_form");
+                                e.preventDefault();
+                                formDetail.submit();
+                                return false;
+                            }
+                        );
+                    },
+                    error: function (response) { // Данные не отправлены
+                        $('#result_form').html('Ошибка. Данные не отправлены.');
+                    }
+                });
+            }
+        </script>
+    {% endblock %}
+</head>
+<body>
+{% block body %}
+    <form name="job_form" method="get" id="ajax_form">
+        <input type="text" name="keyword">
+        <button id="btn">Send Request</button>
+    </form>
+
+    <form action="{{ path('detail_page') }}" name="detail_page" method="post" id="detail_page_form" hidden>
+        <a href="{{ path('detail_page') }}" id="detail_page_ref">Detail page</a>
+    </form>
+    <div id="result_form"></div>
+{% endblock %}
+</body>
+</html>
